@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TURBOFLEX – Round 2</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.quiz-box {
+  background: #111827;
+  width: 550px;
+  padding: 25px;
+  border-radius: 10px;
+}
+
+.timer {
+  text-align: right;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.question-box {
+  background: #1f2933;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.option {
+  background: #1e293b;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.option.selected {
+  border: 2px solid #38bdf8;
+}
+
+button {
+  margin-top: 15px;
+  width: 100%;
+  padding: 12px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="quiz-box">
+  <div class="timer">
+    Time Left: <span id="time">1200</span> sec
+  </div>
+
+  <div class="question-box" id="question"></div>
+
+  <div class="options" id="options"></div>
+
+  <button onclick="nextQuestion()">Next</button>
+</div>
+
+<script>
+/* ========= ROUND 2 QUESTIONS ========= */
+const questions = [
+  {
+    q: "Which data structure works on FIFO (First In First Out) rule?",
+    options: ["Stack", "Queue", "Tree", "Graph"],
+    answer: 1
+  },
+  {
+    q: "Which data structure is mainly used for recursion?",
+    options: ["Queue", "Array", "Stack", "Linked List"],
+    answer: 2
+  },
+  {
+    q: "Which normal form removes partial dependency?",
+    options: ["1NF", "2NF", "3NF", "BCNF"],
+    answer: 1
+  },
+  {
+    q: "Which SQL command removes a table completely?",
+    options: ["DELETE", "REMOVE", "DROP", "TRUNCATE"],
+    answer: 2
+  },
+  {
+    q: "Which symbol ends a statement in C and Java?",
+    options: [":", ".", ";", ","],
+    answer: 2
+  },
+  {
+    q: "Which keyword is used to define a class in Java?",
+    options: ["struct", "define", "class", "object"],
+    answer: 2
+  },
+  {
+    q: "Which concept allows same method name with different parameters?",
+    options: ["Inheritance", "Encapsulation", "Polymorphism", "Abstraction"],
+    answer: 2
+  },
+  {
+    q: "Which keyword stops method overriding in Java?",
+    options: ["static", "private", "final", "protected"],
+    answer: 2
+  },
+  {
+    q: "What is the output of: int a=5; System.out.println(a++);",
+    options: ["4", "5", "6", "Error"],
+    answer: 1
+  },
+  {
+    q: "Output of C program: printf('%d',10+5);",
+    options: ["10", "5", "15", "Error"],
+    answer: 2
+  },
+  {
+    q: "Which keyword defines constant in C?",
+    options: ["constant", "final", "define", "const"],
+    answer: 3
+  },
+  {
+    q: "Which feature allows using properties of another class?",
+    options: ["Polymorphism", "Inheritance", "Encapsulation", "Abstraction"],
+    answer: 1
+  },
+  {
+    q: "Which symbol is used for comments in Python?",
+    options: ["//", "/* */", "#", "%%"],
+    answer: 2
+  },
+  {
+    q: "Which data structure follows LIFO?",
+    options: ["Queue", "Array", "Stack", "Linked List"],
+    answer: 2
+  },
+  {
+    q: "Which method starts execution in Java?",
+    options: ["start()", "main()", "run()", "execute()"],
+    answer: 1
+  }
+];
+
+/* ========= VARIABLES ========= */
+let index = 0;
+let score = 0;
+let selected = null;
+let time = 1200;
+
+/* ========= LOAD QUESTION ========= */
+function loadQuestion() {
+  selected = null;
+  document.getElementById("question").innerText = 
+    (index + 1) + ". " + questions[index].q;
+
+  const optBox = document.getElementById("options");
+  optBox.innerHTML = "";
+
+  questions[index].options.forEach((opt, i) => {
+    const div = document.createElement("div");
+    div.className = "option";
+    div.innerText = opt;
+    div.onclick = () => selectOption(div, i);
+    optBox.appendChild(div);
+  });
+}
+
+function selectOption(el, i) {
+  document.querySelectorAll(".option")
+    .forEach(o => o.classList.remove("selected"));
+  el.classList.add("selected");
+  selected = i;
+}
+
+/* ========= NEXT ========= */
+function nextQuestion() {
+  if (selected === questions[index].answer) {
+    score++;
+  }
+
+  index++;
+
+  if (index >= questions.length) {
+    endQuiz();
+    return;
+  }
+
+  loadQuestion();
+}
+
+/* ========= END QUIZ ========= */
+function endQuiz() {
+  document.body.innerHTML = `
+    <div style="text-align:center">
+      <h1>Round 2 Completed</h1>
+      <h2>Your Score: ${score}</h2>
+      <p>Please contact the coordinator.</p>
+    </div>
+  `;
+}
+
+/* ========= TIMER ========= */
+setInterval(() => {
+  time--;
+  document.getElementById("time").innerText = time;
+  if (time <= 0) endQuiz();
+}, 1000);
+
+/* ========= START ========= */
+loadQuestion();
+</script>
+
+</body>
+</html>
