@@ -39,7 +39,6 @@ button {
   border-radius: 8px;
   cursor: pointer;
   background: #22c55e;
-  color: black;
 }
 </style>
 </head>
@@ -48,7 +47,7 @@ button {
 
 <div class="quiz-box" id="startScreen">
   <h1>Round 1</h1>
-  <p>Click the button below to start the quiz</p>
+  <p>Click Start to begin the quiz</p>
   <button onclick="startQuiz()">Start Quiz</button>
 </div>
 
@@ -59,7 +58,6 @@ button {
 </div>
 
 <script>
-/* ===== QUESTIONS ===== */
 const questions = [
   {
     q: "Which data structure works on FIFO?",
@@ -72,7 +70,7 @@ const questions = [
     answer: 2
   },
   {
-    q: "Which SQL command deletes a table?",
+    q: "Which SQL command removes a table?",
     options: ["DELETE", "REMOVE", "DROP", "TRUNCATE"],
     answer: 2
   }
@@ -83,7 +81,6 @@ let score = 0;
 let time = 120;
 let timer;
 
-/* ===== START QUIZ ===== */
 function startQuiz() {
   document.getElementById("startScreen").style.display = "none";
   document.getElementById("quizScreen").style.display = "block";
@@ -91,7 +88,6 @@ function startQuiz() {
   startTimer();
 }
 
-/* ===== LOAD QUESTION ===== */
 function loadQuestion() {
   if (current >= questions.length) {
     endQuiz();
@@ -99,29 +95,24 @@ function loadQuestion() {
   }
 
   document.getElementById("question").innerText = questions[current].q;
-
   const optDiv = document.getElementById("options");
   optDiv.innerHTML = "";
 
-  questions[current].options.forEach((opt, index) => {
+  questions[current].options.forEach((opt, i) => {
     const div = document.createElement("div");
     div.className = "option";
     div.innerText = opt;
-    div.onclick = () => checkAnswer(index);
+    div.onclick = () => checkAnswer(i);
     optDiv.appendChild(div);
   });
 }
 
-/* ===== CHECK ANSWER ===== */
-function checkAnswer(selected) {
-  if (selected === questions[current].answer) {
-    score++;
-  }
+function checkAnswer(i) {
+  if (i === questions[current].answer) score++;
   current++;
   loadQuestion();
 }
 
-/* ===== TIMER ===== */
 function startTimer() {
   timer = setInterval(() => {
     time--;
@@ -133,19 +124,15 @@ function startTimer() {
   }, 1000);
 }
 
-/* ===== END QUIZ (SAVE TO GOOGLE SHEET) ===== */
 function endQuiz() {
-
   clearInterval(timer);
 
   const mobile = prompt("Enter your registered mobile number");
 
-  fetch("https://script.google.com/macros/s/AKfycbwH51Vz82mRoPrX1e_pFAwHf5L_w8I9AQx81G6q84T78cUBR9Dx820dQBR1A/exec", {
+  fetch("https://script.google.com/macros/s/AKfycbwdOJIW3c4G4NsE3kAZRxrAhWdlPz8We-82OHyMTzRwfXmX4NhP9kwWVGhDGNZZISY0nw/exec", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: `mobile=${mobile}&score=${score}`
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `mobile=${mobile}&score=${score}&round=1`
   });
 
   document.body.innerHTML = `
