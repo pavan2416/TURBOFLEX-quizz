@@ -1,69 +1,73 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Quiz Game</title>
+<title>Image Quiz</title>
 
 <style>
-body {
+body{
   font-family: Arial, sans-serif;
-  background: #0f172a;
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  background:#0f172a;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
 }
-.quiz-box {
-  background: #111827;
-  width: 520px;
-  padding: 25px;
-  border-radius: 12px;
-  text-align: center;
+.quiz-box{
+  background:#111827;
+  width:520px;
+  padding:25px;
+  border-radius:12px;
+  text-align:center;
 }
-.question-box {
-  background: #1f2933;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 15px;
+.question-box{
+  background:#1f2933;
+  padding:15px;
+  border-radius:8px;
+  margin-bottom:12px;
 }
-#imageBox {
-  margin-bottom: 15px;
-  display: none;
+#imageBox{margin-bottom:12px;}
+#questionImage{
+  width:100%;
+  border-radius:10px;
 }
-#questionImage {
-  width: 100%;
-  border-radius: 10px;
+.options{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
 }
-.options {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+.option{
+  background:#1e293b;
+  padding:12px;
+  border-radius:8px;
+  cursor:pointer;
+  border:2px solid transparent;
 }
-.option {
-  background: #1e293b;
-  padding: 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  border: 2px solid transparent;
+.option:hover{background:#334155;}
+.correct{border-color:#22c55e;}
+.wrong{border-color:#ef4444;}
+button{
+  margin-top:15px;
+  padding:10px;
+  width:100%;
+  border:none;
+  border-radius:8px;
+  background:#2563eb;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
 }
-.option:hover {
-  background: #334155;
+button:disabled{
+  background:#475569;
+  cursor:not-allowed;
 }
-.correct { border-color: #22c55e; }
-.wrong { border-color: #ef4444; }
-button {
-  margin-top: 15px;
-  padding: 10px;
-  width: 100%;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  background: #2563eb;
-  color: white;
-  font-size: 16px;
+#quizArea{display:none;}
+.counter{
+  text-align:right;
+  font-size:14px;
+  margin-bottom:5px;
 }
-#quizArea { display: none; }
 </style>
 </head>
 
@@ -72,12 +76,14 @@ button {
 <div class="quiz-box">
 
 <div id="startScreen">
-  <h2>Welcome to the Quiz</h2>
-  <p>20 Questions</p>
+  <h2>Image Quiz</h2>
+  <p>10 Questions</p>
   <button onclick="startQuiz()">Start Quiz</button>
 </div>
 
 <div id="quizArea">
+  <div class="counter" id="counter"></div>
+
   <div class="question-box">
     <div id="questionText"></div>
   </div>
@@ -93,91 +99,126 @@ button {
     <div class="option"></div>
   </div>
 
-  <button id="nextBtn" onclick="nextQuestion()">Next</button>
+  <button id="nextBtn" onclick="nextQuestion()" disabled>Next</button>
   <button id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
 </div>
 
 </div>
 
 <script>
-const questions = [
-  { type:"image", question:"Identify the sportsperson", image:"https://drive.google.com/uc?export=view&id=1Rzp7osRpGZRhqdbGSQvVV4VAXk-3fkSv",
-    options:["Manu Bhaker","PV Sindhu","Mary Kom","Saina Nehwal"], answer:0 },
-
-  { type:"image", question:"Identify the personality", image:"https://drive.google.com/uc?export=view&id=1g0wCR13_VmW_QOeSldrKACpiOIhmJY7L",
-    options:["Narendra Modi","Rahul Gandhi","Amit Shah","Yogi Adityanath"], answer:0 },
-
-  { type:"image", question:"Identify the logo", image:"https://drive.google.com/uc?export=view&id=1nCSzAw0AygDNGTJ_zc3-9CSmpbQ1VIY6",
-    options:["ISRO","NASA","DRDO","ESA"], answer:0 },
-
-  { type:"image", question:"Identify the company logo", image:"https://drive.google.com/uc?export=view&id=18vuqo0UJSW1v63rYJUn-fGzwk4xPOBQK",
-    options:["Google","Microsoft","Apple","Amazon"], answer:0 },
-
-  { type:"image", question:"Identify the app logo", image:"https://drive.google.com/uc?export=view&id=14XwqeRoe8rDX5SrDQoe44GKotzY80iYz",
-    options:["Instagram","Facebook","Twitter","Snapchat"], answer:0 },
-
-  { type:"image", question:"Identify the monument", image:"https://drive.google.com/uc?export=view&id=1Ck8o6BfyCJvsU9qcFYR8C4E_MCKB9ZQH",
-    options:["Taj Mahal","Qutub Minar","Charminar","Red Fort"], answer:0 },
-
-  { type:"image", question:"Identify the cricketer", image:"https://drive.google.com/uc?export=view&id=1JZvZHTwP4Jn13r2qlHgucNkj0IbAFfk_",
-    options:["Virat Kohli","Rohit Sharma","Dhoni","Hardik Pandya"], answer:0 },
-
-  { type:"image", question:"Identify the logo", image:"https://drive.google.com/uc?export=view&id=1EOP-eedutLpB9AKnkrJPPoP2HY_tWGOE",
-    options:["Java","Python","C++","PHP"], answer:1 },
-
-  { type:"image", question:"Identify the device", image:"https://drive.google.com/uc?export=view&id=1g19bmmuOKsIahaHE3GrcfMPhC40TqXDI",
-    options:["Laptop","Tablet","Mobile","Desktop"], answer:2 },
-
-  { type:"image", question:"Identify the flag", image:"https://drive.google.com/uc?export=view&id=1LdwA0Su640ah-lArVunaM8iynY6btBM9",
-    options:["India","USA","UK","Japan"], answer:0 }
+const questions=[
+{
+ image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/manu%20bhaker.jpeg",
+ question:"Identify the sportsperson",
+ options:["Manu Bhaker","PV Sindhu","Mary Kom","Saina Nehwal"],
+ answer:0
+},
+{
+ image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/jensen.jpeg",
+ question:"Identify the personality",
+ options:["Jensen Huang","Elon Musk","Jeff Bezos","Bill Gates"],
+ answer:0
+},
+{
+ image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/ambani.jpeg",
+ question:"Identify the business leader",
+ options:["Mukesh Ambani","Gautam Adani","Ratan Tata","Azim Premji"],
+ answer:0
+},
+{
+ image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/sudha%20murthy.jpeg",
+ question:"Identify the author",
+ options:["Sudha Murthy","Arundhati Roy","Kiran Bedi","Indra Nooyi"],
+ answer:0
+},
+{
+ image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/narayana%20murthy.jpeg",
+ question:"Founder of Infosys",
+ options:["N R Narayana Murthy","Sundar Pichai","Satya Nadella","Ratan Tata"],
+ answer:0
+},
+{
+ image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/tata.jpeg",
+ question:"Identify the industrialist",
+ options:["Ratan Tata","Mukesh Ambani","Adani","Birla"],
+ answer:0
+},
+{
+ image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/pichai.jpeg",
+ question:"CEO of Google",
+ options:["Sundar Pichai","Satya Nadella","Tim Cook","Mark Zuckerberg"],
+ answer:0
+},
+{
+ image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/stephen.jpeg",
+ question:"Famous scientist",
+ options:["Stephen Hawking","Einstein","Newton","Tesla"],
+ answer:0
+},
+{
+ image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/stalin.jpeg",
+ question:"Chief Minister of Tamil Nadu",
+ options:["M K Stalin","EPS","Jayalalitha","Karunanidhi"],
+ answer:0
+},
+{
+ image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/nadella.jpeg",
+ question:"CEO of Microsoft",
+ options:["Satya Nadella","Bill Gates","Steve Jobs","Larry Page"],
+ answer:0
+}
 ];
 
-let currentQuestion=0, score=0, locked=false;
+let index=0, score=0, locked=false;
 
 function startQuiz(){
-  document.getElementById("startScreen").style.display="none";
-  document.getElementById("quizArea").style.display="block";
-  loadQuestion();
+ document.getElementById("startScreen").style.display="none";
+ document.getElementById("quizArea").style.display="block";
+ loadQuestion();
 }
 
 function loadQuestion(){
-  locked=false;
-  const q=questions[currentQuestion];
-  document.getElementById("questionText").innerText=`Q${currentQuestion+1}. ${q.question}`;
+ locked=false;
+ document.getElementById("nextBtn").disabled=true;
+ const q=questions[index];
+ document.getElementById("counter").innerText=`Q ${index+1} / ${questions.length}`;
+ document.getElementById("questionText").innerText=q.question;
+ document.getElementById("questionImage").src=q.image;
 
-  const img=document.getElementById("questionImage");
-  const box=document.getElementById("imageBox");
-  img.src=q.image;
-  box.style.display="block";
+ document.querySelectorAll(".option").forEach((btn,i)=>{
+  btn.className="option";
+  btn.innerText=q.options[i];
+  btn.onclick=()=>selectAnswer(i);
+ });
 
-  document.querySelectorAll(".option").forEach((b,i)=>{
-    b.className="option";
-    b.innerText=q.options[i];
-    b.onclick=()=>checkAnswer(i);
-  });
-
-  document.getElementById("nextBtn").style.display=
-    currentQuestion===questions.length-1?"none":"block";
-  document.getElementById("submitBtn").style.display=
-    currentQuestion===questions.length-1?"block":"none";
+ document.getElementById("nextBtn").style.display=
+   index===questions.length-1?"none":"block";
+ document.getElementById("submitBtn").style.display=
+   index===questions.length-1?"block":"none";
 }
 
-function checkAnswer(i){
-  if(locked) return;
-  locked=true;
-  const q=questions[currentQuestion];
-  const o=document.querySelectorAll(".option");
-  if(i===q.answer){ o[i].classList.add("correct"); score++; }
-  else{ o[i].classList.add("wrong"); o[q.answer].classList.add("correct"); }
+function selectAnswer(i){
+ if(locked) return;
+ locked=true;
+ document.getElementById("nextBtn").disabled=false;
+ const q=questions[index];
+ const opts=document.querySelectorAll(".option");
+ if(i===q.answer){
+  opts[i].classList.add("correct");
+  score++;
+ }else{
+  opts[i].classList.add("wrong");
+  opts[q.answer].classList.add("correct");
+ }
 }
 
 function nextQuestion(){
-  if(!locked) return alert("Select an option");
-  currentQuestion++; loadQuestion();
+ index++;
+ loadQuestion();
 }
 
 function submitQuiz(){
-  alert("Quiz submitted!\nScore: "+score+"/"+questions.length);
+ alert("Quiz Submitted!\nScore: "+score+"/"+questions.length);
 }
 </script>
 
