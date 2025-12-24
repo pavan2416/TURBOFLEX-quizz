@@ -2,177 +2,182 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Round 1 Quiz</title>
+<title>Quiz Game</title>
 
 <style>
 body {
   font-family: Arial, sans-serif;
   background: #0f172a;
   color: white;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
-
 .quiz-box {
   background: #111827;
   width: 520px;
-  margin: 40px auto;
-  padding: 20px;
+  padding: 25px;
+  border-radius: 12px;
+  text-align: center;
+}
+.question-box {
+  background: #1f2933;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+#imageBox {
+  margin-bottom: 15px;
+  display: none;
+}
+#questionImage {
+  width: 100%;
   border-radius: 10px;
 }
-
+.options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
 .option {
   background: #1e293b;
-  margin: 8px;
-  padding: 10px;
+  padding: 12px;
   border-radius: 8px;
   cursor: pointer;
+  border: 2px solid transparent;
 }
-
 .option:hover {
-  background: #2563eb;
+  background: #334155;
 }
-
+.correct { border-color: #22c55e; }
+.wrong { border-color: #ef4444; }
 button {
-  padding: 12px 25px;
-  font-size: 16px;
+  margin-top: 15px;
+  padding: 10px;
+  width: 100%;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  background: #22c55e;
+  background: #2563eb;
+  color: white;
+  font-size: 16px;
 }
-
-img {
-  max-width: 100%;
-  margin: 10px 0;
-  border-radius: 8px;
-}
+#quizArea { display: none; }
 </style>
 </head>
 
 <body>
 
-<div class="quiz-box" id="startScreen">
-  <h1>Round 1</h1>
-  <p>20 Questions (10 Normal + 10 Photo)</p>
+<div class="quiz-box">
+
+<div id="startScreen">
+  <h2>Welcome to the Quiz</h2>
+  <p>20 Questions</p>
   <button onclick="startQuiz()">Start Quiz</button>
 </div>
 
-<div class="quiz-box" id="quizScreen" style="display:none;">
-  <h3 id="qCount"></h3>
-  <h2 id="question"></h2>
-  <div id="options"></div>
-  <p>⏱ Time Left: <span id="time">300</span> sec</p>
+<div id="quizArea">
+  <div class="question-box">
+    <div id="questionText"></div>
+  </div>
+
+  <div id="imageBox">
+    <img id="questionImage">
+  </div>
+
+  <div class="options">
+    <div class="option"></div>
+    <div class="option"></div>
+    <div class="option"></div>
+    <div class="option"></div>
+  </div>
+
+  <button id="nextBtn" onclick="nextQuestion()">Next</button>
+  <button id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
+</div>
+
 </div>
 
 <script>
 const questions = [
+  { type:"image", question:"Identify the sportsperson", image:"https://drive.google.com/uc?export=view&id=1Rzp7osRpGZRhqdbGSQvVV4VAXk-3fkSv",
+    options:["Manu Bhaker","PV Sindhu","Mary Kom","Saina Nehwal"], answer:0 },
 
-  // -------- NORMAL QUESTIONS (1–10) --------
-  { q:"Which data structure works on FIFO?", image:"", options:["Stack","Queue","Tree","Graph"], answer:1 },
-  { q:"Which is used for recursion?", image:"", options:["Queue","Array","Stack","Linked List"], answer:2 },
-  { q:"Which SQL command removes a table?", image:"", options:["DELETE","REMOVE","DROP","TRUNCATE"], answer:2 },
-  { q:"Full form of RAM?", image:"", options:["Read Access Memory","Random Access Memory","Run Access Memory","Real Access Memory"], answer:1 },
-  { q:"Which is an operating system?", image:"", options:["MS Word","Linux","Chrome","Oracle"], answer:1 },
-  { q:"Which device is used to input data?", image:"", options:["Monitor","Printer","Keyboard","Speaker"], answer:2 },
-  { q:"What does CPU stand for?", image:"", options:["Central Processing Unit","Computer Power Unit","Control Processing Unit","Central Program Unit"], answer:0 },
-  { q:"Which language is used for web pages?", image:"", options:["C","Python","HTML","Java"], answer:2 },
-  { q:"Which is not a programming language?", image:"", options:["Java","Python","HTML","Oracle"], answer:3 },
-  { q:"Which company developed Android?", image:"", options:["Apple","Microsoft","Google","IBM"], answer:2 },
+  { type:"image", question:"Identify the personality", image:"https://drive.google.com/uc?export=view&id=1g0wCR13_VmW_QOeSldrKACpiOIhmJY7L",
+    options:["Narendra Modi","Rahul Gandhi","Amit Shah","Yogi Adityanath"], answer:0 },
 
-  // -------- PHOTO QUESTIONS (11–20) --------
-  { q:"Identify this person", image:"https://upload.wikimedia.org/wikipedia/commons/3/3f/APJ_Abdul_Kalam.jpg",
-    options:["APJ Abdul Kalam","Ratan Tata","Sundar Pichai","MS Dhoni"], answer:0 },
+  { type:"image", question:"Identify the logo", image:"https://drive.google.com/uc?export=view&id=1nCSzAw0AygDNGTJ_zc3-9CSmpbQ1VIY6",
+    options:["ISRO","NASA","DRDO","ESA"], answer:0 },
 
-  { q:"Who is this cricketer?", image:"https://upload.wikimedia.org/wikipedia/commons/9/9f/MS_Dhoni_2016.jpg",
-    options:["Virat Kohli","Rohit Sharma","MS Dhoni","KL Rahul"], answer:2 },
+  { type:"image", question:"Identify the company logo", image:"https://drive.google.com/uc?export=view&id=18vuqo0UJSW1v63rYJUn-fGzwk4xPOBQK",
+    options:["Google","Microsoft","Apple","Amazon"], answer:0 },
 
-  { q:"Identify this logo", image:"https://upload.wikimedia.org/wikipedia/commons/a/ab/Android_O_Preview_Logo.png",
-    options:["Apple","Android","Windows","Linux"], answer:1 },
+  { type:"image", question:"Identify the app logo", image:"https://drive.google.com/uc?export=view&id=14XwqeRoe8rDX5SrDQoe44GKotzY80iYz",
+    options:["Instagram","Facebook","Twitter","Snapchat"], answer:0 },
 
-  { q:"Identify this company logo", image:"https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg",
-    options:["Google","Microsoft","IBM","Intel"], answer:1 },
+  { type:"image", question:"Identify the monument", image:"https://drive.google.com/uc?export=view&id=1Ck8o6BfyCJvsU9qcFYR8C4E_MCKB9ZQH",
+    options:["Taj Mahal","Qutub Minar","Charminar","Red Fort"], answer:0 },
 
-  { q:"Who is this business leader?", image:"https://upload.wikimedia.org/wikipedia/commons/1/1f/Ratan_Tata_photo.jpg",
-    options:["Mukesh Ambani","Ratan Tata","Gautam Adani","Narayana Murthy"], answer:1 },
+  { type:"image", question:"Identify the cricketer", image:"https://drive.google.com/uc?export=view&id=1JZvZHTwP4Jn13r2qlHgucNkj0IbAFfk_",
+    options:["Virat Kohli","Rohit Sharma","Dhoni","Hardik Pandya"], answer:0 },
 
-  { q:"Identify this programming language logo", image:"https://upload.wikimedia.org/wikipedia/en/3/30/Java_programming_language_logo.svg",
-    options:["Python","C++","Java","JavaScript"], answer:2 },
+  { type:"image", question:"Identify the logo", image:"https://drive.google.com/uc?export=view&id=1EOP-eedutLpB9AKnkrJPPoP2HY_tWGOE",
+    options:["Java","Python","C++","PHP"], answer:1 },
 
-  { q:"Which country flag is this?", image:"https://upload.wikimedia.org/wikipedia/en/4/41/Flag_of_India.svg",
-    options:["Japan","India","Ireland","Italy"], answer:1 },
+  { type:"image", question:"Identify the device", image:"https://drive.google.com/uc?export=view&id=1g19bmmuOKsIahaHE3GrcfMPhC40TqXDI",
+    options:["Laptop","Tablet","Mobile","Desktop"], answer:2 },
 
-  { q:"Identify this space organization logo", image:"https://upload.wikimedia.org/wikipedia/commons/b/bd/Indian_Space_Research_Organisation_Logo.svg",
-    options:["NASA","ISRO","ESA","SpaceX"], answer:1 },
-
-  { q:"Identify this browser logo", image:"https://upload.wikimedia.org/wikipedia/commons/e/e2/Google_Chrome_icon_%282011%29.svg",
-    options:["Firefox","Edge","Chrome","Safari"], answer:2 },
-
-  { q:"Identify this operating system logo", image:"https://upload.wikimedia.org/wikipedia/commons/a/af/Tux.png",
-    options:["Windows","Android","Linux","macOS"], answer:2 }
+  { type:"image", question:"Identify the flag", image:"https://drive.google.com/uc?export=view&id=1LdwA0Su640ah-lArVunaM8iynY6btBM9",
+    options:["India","USA","UK","Japan"], answer:0 }
 ];
 
-let current = 0;
-let score = 0;
-let time = 300;
-let timer;
+let currentQuestion=0, score=0, locked=false;
 
 function startQuiz(){
   document.getElementById("startScreen").style.display="none";
-  document.getElementById("quizScreen").style.display="block";
+  document.getElementById("quizArea").style.display="block";
   loadQuestion();
-  timer = setInterval(()=>{
-    time--;
-    document.getElementById("time").innerText=time;
-    if(time<=0){ clearInterval(timer); endQuiz(); }
-  },1000);
 }
 
 function loadQuestion(){
-  if(current>=questions.length){ endQuiz(); return; }
+  locked=false;
+  const q=questions[currentQuestion];
+  document.getElementById("questionText").innerText=`Q${currentQuestion+1}. ${q.question}`;
 
-  const q = questions[current];
-  document.getElementById("qCount").innerText = `Question ${current+1} / 20`;
-  document.getElementById("question").innerText = q.q;
+  const img=document.getElementById("questionImage");
+  const box=document.getElementById("imageBox");
+  img.src=q.image;
+  box.style.display="block";
 
-  const optDiv = document.getElementById("options");
-  optDiv.innerHTML="";
-
-  if(q.image){
-    const img=document.createElement("img");
-    img.src=q.image;
-    optDiv.appendChild(img);
-  }
-
-  q.options.forEach((opt,i)=>{
-    const div=document.createElement("div");
-    div.className="option";
-    div.innerText=opt;
-    div.onclick=()=>checkAnswer(i);
-    optDiv.appendChild(div);
+  document.querySelectorAll(".option").forEach((b,i)=>{
+    b.className="option";
+    b.innerText=q.options[i];
+    b.onclick=()=>checkAnswer(i);
   });
+
+  document.getElementById("nextBtn").style.display=
+    currentQuestion===questions.length-1?"none":"block";
+  document.getElementById("submitBtn").style.display=
+    currentQuestion===questions.length-1?"block":"none";
 }
 
 function checkAnswer(i){
-  if(i===questions[current].answer) score++;
-  current++;
-  loadQuestion();
+  if(locked) return;
+  locked=true;
+  const q=questions[currentQuestion];
+  const o=document.querySelectorAll(".option");
+  if(i===q.answer){ o[i].classList.add("correct"); score++; }
+  else{ o[i].classList.add("wrong"); o[q.answer].classList.add("correct"); }
 }
 
-function endQuiz(){
-  clearInterval(timer);
-  const mobile = prompt("Enter your registered mobile number");
+function nextQuestion(){
+  if(!locked) return alert("Select an option");
+  currentQuestion++; loadQuestion();
+}
 
-  fetch("https://script.google.com/macros/s/AKfycbwdOJIW3c4G4NsE3kAZRxrAhWdlPz8We-82OHyMTzRwfXmX4NhP9kwWVGhDGNZZISY0nw/exec",{
-    method:"POST",
-    headers:{ "Content-Type":"application/x-www-form-urlencoded" },
-    body:`mobile=${mobile}&score=${score}&round=1`
-  });
-
-  document.body.innerHTML = `
-    <h1>Round 1 Completed</h1>
-    <h2>Your Score: ${score} / 20</h2>
-    <p>Please wait for results</p>
-  `;
+function submitQuiz(){
+  alert("Quiz submitted!\nScore: "+score+"/"+questions.length);
 }
 </script>
 
