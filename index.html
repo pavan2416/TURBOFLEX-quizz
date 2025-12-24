@@ -1,224 +1,186 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Image Quiz</title>
+<title>Round 1 Quiz</title>
 
 <style>
-body{
+body {
   font-family: Arial, sans-serif;
-  background:#0f172a;
-  color:white;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
+  background: #0f172a;
+  color: white;
+  text-align: center;
 }
-.quiz-box{
-  background:#111827;
-  width:520px;
-  padding:25px;
-  border-radius:12px;
-  text-align:center;
+
+.quiz-box {
+  background: #111827;
+  width: 520px;
+  margin: 40px auto;
+  padding: 20px;
+  border-radius: 10px;
 }
-.question-box{
-  background:#1f2933;
-  padding:15px;
-  border-radius:8px;
-  margin-bottom:12px;
+
+.option {
+  background: #1e293b;
+  margin: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
 }
-#imageBox{margin-bottom:12px;}
-#questionImage{
-  width:100%;
-  border-radius:10px;
+
+.option:hover {
+  background: #2563eb;
 }
-.options{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
+
+button {
+  padding: 12px 25px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #22c55e;
 }
-.option{
-  background:#1e293b;
-  padding:12px;
-  border-radius:8px;
-  cursor:pointer;
-  border:2px solid transparent;
-}
-.option:hover{background:#334155;}
-.correct{border-color:#22c55e;}
-.wrong{border-color:#ef4444;}
-button{
-  margin-top:15px;
-  padding:10px;
-  width:100%;
-  border:none;
-  border-radius:8px;
-  background:#2563eb;
-  color:white;
-  font-size:16px;
-  cursor:pointer;
-}
-button:disabled{
-  background:#475569;
-  cursor:not-allowed;
-}
-#quizArea{display:none;}
-.counter{
-  text-align:right;
-  font-size:14px;
-  margin-bottom:5px;
+
+img {
+  max-width: 100%;
+  margin: 10px 0;
+  border-radius: 8px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="quiz-box">
-
-<div id="startScreen">
-  <h2>Image Quiz</h2>
-  <p>10 Questions</p>
+<div class="quiz-box" id="startScreen">
+  <h1>Round 1</h1>
+  <p>20 Questions (10 Normal + 10 Photo)</p>
+  <p>⏱ Time: 20 Minutes</p>
   <button onclick="startQuiz()">Start Quiz</button>
 </div>
 
-<div id="quizArea">
-  <div class="counter" id="counter"></div>
-
-  <div class="question-box">
-    <div id="questionText"></div>
-  </div>
-
-  <div id="imageBox">
-    <img id="questionImage">
-  </div>
-
-  <div class="options">
-    <div class="option"></div>
-    <div class="option"></div>
-    <div class="option"></div>
-    <div class="option"></div>
-  </div>
-
-  <button id="nextBtn" onclick="nextQuestion()" disabled>Next</button>
-  <button id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
-</div>
-
+<div class="quiz-box" id="quizScreen" style="display:none;">
+  <h3 id="qCount"></h3>
+  <h2 id="question"></h2>
+  <div id="options"></div>
+  <p>⏱ Time Left: <span id="time">1200</span> sec</p>
 </div>
 
 <script>
-const questions=[
-{
- image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/manu%20bhaker.jpeg",
- question:"Identify the sportsperson",
- options:["Manu Bhaker","PV Sindhu","Mary Kom","Saina Nehwal"],
- answer:0
-},
-{
- image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/jensen.jpeg",
- question:"Identify the personality",
- options:["Jensen Huang","Elon Musk","Jeff Bezos","Bill Gates"],
- answer:0
-},
-{
- image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/ambani.jpeg",
- question:"Identify the business leader",
- options:["Mukesh Ambani","Gautam Adani","Ratan Tata","Azim Premji"],
- answer:0
-},
-{
- image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/sudha%20murthy.jpeg",
- question:"Identify the author",
- options:["Sudha Murthy","Arundhati Roy","Kiran Bedi","Indra Nooyi"],
- answer:0
-},
-{
- image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/narayana%20murthy.jpeg",
- question:"Founder of Infosys",
- options:["N R Narayana Murthy","Sundar Pichai","Satya Nadella","Ratan Tata"],
- answer:0
-},
-{
- image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/tata.jpeg",
- question:"Identify the industrialist",
- options:["Ratan Tata","Mukesh Ambani","Adani","Birla"],
- answer:0
-},
-{
- image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/pichai.jpeg",
- question:"CEO of Google",
- options:["Sundar Pichai","Satya Nadella","Tim Cook","Mark Zuckerberg"],
- answer:0
-},
-{
- image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/stephen.jpeg",
- question:"Famous scientist",
- options:["Stephen Hawking","Einstein","Newton","Tesla"],
- answer:0
-},
-{
- image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/stalin.jpeg",
- question:"Chief Minister of Tamil Nadu",
- options:["M K Stalin","EPS","Jayalalitha","Karunanidhi"],
- answer:0
-},
-{
- image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/nadella.jpeg",
- question:"CEO of Microsoft",
- options:["Satya Nadella","Bill Gates","Steve Jobs","Larry Page"],
- answer:0
-}
+const questions = [
+
+  // -------- NORMAL QUESTIONS (1–10) --------
+  { q:"Which data structure works on FIFO?", image:"", options:["Stack","Queue","Tree","Graph"], answer:1 },
+  { q:"Which is used for recursion?", image:"", options:["Queue","Array","Stack","Linked List"], answer:2 },
+  { q:"Which SQL command removes a table?", image:"", options:["DELETE","REMOVE","DROP","TRUNCATE"], answer:2 },
+  { q:"Full form of RAM?", image:"", options:["Read Access Memory","Random Access Memory","Run Access Memory","Real Access Memory"], answer:1 },
+  { q:"Which is an operating system?", image:"", options:["MS Word","Linux","Chrome","Oracle"], answer:1 },
+  { q:"Which device is used to input data?", image:"", options:["Monitor","Printer","Keyboard","Speaker"], answer:2 },
+  { q:"What does CPU stand for?", image:"", options:["Central Processing Unit","Computer Power Unit","Control Processing Unit","Central Program Unit"], answer:0 },
+  { q:"Which language is used for web pages?", image:"", options:["C","Python","HTML","Java"], answer:2 },
+  { q:"Which is not a programming language?", image:"", options:["Java","Python","HTML","Oracle"], answer:3 },
+  { q:"Which company developed Android?", image:"", options:["Apple","Microsoft","Google","IBM"], answer:2 },
+
+  // -------- PHOTO QUESTIONS (11–20) --------
+  { q:"Identify this person", image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/manu%20bhaker.jpeg",
+    options:["Manu Bhaker","PV Sindhu","Mary Kom","Saina Nehwal"], answer:0 },
+
+  { q:"Identify this person", image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/jensen.jpeg",
+    options:["Jensen Huang","Elon Musk","Jeff Bezos","Bill Gates"], answer:0 },
+
+  { q:"Identify this business leader", image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/ambani.jpeg",
+    options:["Mukesh Ambani","Gautam Adani","Ratan Tata","Azim Premji"], answer:0 },
+
+  { q:"Identify this author", image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/sudha%20murthy.jpeg",
+    options:["Sudha Murthy","Arundhati Roy","Kiran Bedi","Indra Nooyi"], answer:0 },
+
+  { q:"Founder of Infosys", image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/narayana%20murthy.jpeg",
+    options:["N R Narayana Murthy","Sundar Pichai","Satya Nadella","Ratan Tata"], answer:0 },
+
+  { q:"Identify this industrialist", image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/tata.jpeg",
+    options:["Ratan Tata","Mukesh Ambani","Gautam Adani","Birla"], answer:0 },
+
+  { q:"CEO of Google", image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/pichai.jpeg",
+    options:["Sundar Pichai","Satya Nadella","Tim Cook","Mark Zuckerberg"], answer:0 },
+
+  { q:"Famous scientist", image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/stephen.jpeg",
+    options:["Stephen Hawking","Einstein","Newton","Tesla"], answer:0 },
+
+  { q:"Chief Minister of Tamil Nadu", image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/stalin.jpeg",
+    options:["M K Stalin","EPS","Jayalalitha","Karunanidhi"], answer:0 },
+
+  { q:"CEO of Microsoft", image:"https://raw.githubusercontent.com/pavan2416/quiz-images/main/nadella.jpeg",
+    options:["Satya Nadella","Bill Gates","Steve Jobs","Larry Page"], answer:0 }
 ];
 
-let index=0, score=0, locked=false;
+let current = 0;
+let score = 0;
+let time = 1200;   // ✅ 20 minutes
+let timer;
 
 function startQuiz(){
- document.getElementById("startScreen").style.display="none";
- document.getElementById("quizArea").style.display="block";
- loadQuestion();
+  document.getElementById("startScreen").style.display="none";
+  document.getElementById("quizScreen").style.display="block";
+  loadQuestion();
+
+  timer = setInterval(()=>{
+    time--;
+    document.getElementById("time").innerText = time;
+    if(time <= 0){
+      clearInterval(timer);
+      endQuiz();
+    }
+  },1000);
 }
 
 function loadQuestion(){
- locked=false;
- document.getElementById("nextBtn").disabled=true;
- const q=questions[index];
- document.getElementById("counter").innerText=`Q ${index+1} / ${questions.length}`;
- document.getElementById("questionText").innerText=q.question;
- document.getElementById("questionImage").src=q.image;
+  if(current >= questions.length){
+    endQuiz();
+    return;
+  }
 
- document.querySelectorAll(".option").forEach((btn,i)=>{
-  btn.className="option";
-  btn.innerText=q.options[i];
-  btn.onclick=()=>selectAnswer(i);
- });
+  const q = questions[current];
+  document.getElementById("qCount").innerText = `Question ${current+1} / 20`;
+  document.getElementById("question").innerText = q.q;
 
- document.getElementById("nextBtn").style.display=
-   index===questions.length-1?"none":"block";
- document.getElementById("submitBtn").style.display=
-   index===questions.length-1?"block":"none";
+  const optDiv = document.getElementById("options");
+  optDiv.innerHTML = "";
+
+  if(q.image){
+    const img = document.createElement("img");
+    img.src = q.image;
+    optDiv.appendChild(img);
+  }
+
+  q.options.forEach((opt,i)=>{
+    const div = document.createElement("div");
+    div.className = "option";
+    div.innerText = opt;
+    div.onclick = ()=>checkAnswer(i);
+    optDiv.appendChild(div);
+  });
 }
 
-function selectAnswer(i){
- if(locked) return;
- locked=true;
- document.getElementById("nextBtn").disabled=false;
- const q=questions[index];
- const opts=document.querySelectorAll(".option");
- if(i===q.answer){
-  opts[i].classList.add("correct");
-  score++;
- }else{
-  opts[i].classList.add("wrong");
-  opts[q.answer].classList.add("correct");
- }
+function checkAnswer(i){
+  if(i === questions[current].answer) score++;
+  current++;
+  loadQuestion();
 }
 
-function nextQuestion(){
- index++;
- loadQuestion();
-}
+function endQuiz(){
+  clearInterval(timer);
+  const mobile = prompt("Enter your registered mobile number");
 
-function submitQuiz(){
- alert("Quiz Submitted!\nScore: "+score+"/"+questions.length);
+  fetch("https://script.google.com/macros/s/AKfycbwdOJIW3c4G4NsE3kAZRxrAhWdlPz8We-82OHyMTzRwfXmX4NhP9kwWVGhDGNZZISY0nw/exec",{
+    method:"POST",
+    headers:{ "Content-Type":"application/x-www-form-urlencoded" },
+    body:`mobile=${mobile}&score=${score}&round=1`
+  });
+
+  document.body.innerHTML = `
+    <h1>Round 1 Completed</h1>
+    <h2>Your Score: ${score} / 20</h2>
+    <p>Please wait for results</p>
+  `;
 }
 </script>
 
