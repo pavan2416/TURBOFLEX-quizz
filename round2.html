@@ -2,232 +2,140 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TURBOFLEX – Round 2</title>
+<title>Round 2 Quiz</title>
 
 <style>
 body {
   font-family: Arial, sans-serif;
   background: #0f172a;
   color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  text-align: center;
 }
 
 .quiz-box {
   background: #111827;
-  width: 550px;
-  padding: 25px;
+  width: 500px;
+  margin: 50px auto;
+  padding: 20px;
   border-radius: 10px;
-}
-
-.timer {
-  text-align: right;
-  margin-bottom: 10px;
-  font-weight: bold;
-}
-
-.question-box {
-  background: #1f2933;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 15px;
-}
-
-.options {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
 }
 
 .option {
   background: #1e293b;
-  padding: 12px;
+  margin: 10px;
+  padding: 10px;
   border-radius: 8px;
   cursor: pointer;
-  border: 2px solid transparent;
 }
 
-.option.selected {
-  border: 2px solid #38bdf8;
+.option:hover {
+  background: #2563eb;
 }
 
 button {
-  margin-top: 15px;
-  width: 100%;
-  padding: 12px;
-  background: #2563eb;
-  color: white;
+  padding: 12px 25px;
+  font-size: 16px;
   border: none;
   border-radius: 8px;
-  font-size: 16px;
   cursor: pointer;
+  background: #facc15;
 }
 </style>
 </head>
 
 <body>
 
-<div class="quiz-box">
-  <div class="timer">
-    Time Left: <span id="time">1200</span> sec
-  </div>
+<div class="quiz-box" id="startScreen">
+  <h1>Round 2</h1>
+  <p>Click Start to begin Round 2</p>
+  <button onclick="startQuiz()">Start Quiz</button>
+</div>
 
-  <div class="question-box" id="question"></div>
-
-  <div class="options" id="options"></div>
-
-  <button onclick="nextQuestion()">Next</button>
+<div class="quiz-box" id="quizScreen" style="display:none;">
+  <h2 id="question"></h2>
+  <div id="options"></div>
+  <p>⏱ Time Left: <span id="time">120</span> sec</p>
 </div>
 
 <script>
-/* ========= ROUND 2 QUESTIONS ========= */
 const questions = [
   {
-    q: "Which data structure works on FIFO (First In First Out) rule?",
-    options: ["Stack", "Queue", "Tree", "Graph"],
+    q: "Which operating system is open source?",
+    options: ["Windows", "Linux", "macOS", "DOS"],
     answer: 1
   },
   {
-    q: "Which data structure is mainly used for recursion?",
-    options: ["Queue", "Array", "Stack", "Linked List"],
-    answer: 2
-  },
-  {
-    q: "Which normal form removes partial dependency?",
-    options: ["1NF", "2NF", "3NF", "BCNF"],
-    answer: 1
-  },
-  {
-    q: "Which SQL command removes a table completely?",
-    options: ["DELETE", "REMOVE", "DROP", "TRUNCATE"],
-    answer: 2
-  },
-  {
-    q: "Which symbol ends a statement in C and Java?",
-    options: [":", ".", ";", ","],
-    answer: 2
-  },
-  {
-    q: "Which keyword is used to define a class in Java?",
-    options: ["struct", "define", "class", "object"],
-    answer: 2
-  },
-  {
-    q: "Which concept allows same method name with different parameters?",
-    options: ["Inheritance", "Encapsulation", "Polymorphism", "Abstraction"],
-    answer: 2
-  },
-  {
-    q: "Which keyword stops method overriding in Java?",
-    options: ["static", "private", "final", "protected"],
-    answer: 2
-  },
-  {
-    q: "What is the output of: int a=5; System.out.println(a++);",
-    options: ["4", "5", "6", "Error"],
-    answer: 1
-  },
-  {
-    q: "Output of C program: printf('%d',10+5);",
-    options: ["10", "5", "15", "Error"],
-    answer: 2
-  },
-  {
-    q: "Which keyword defines constant in C?",
-    options: ["constant", "final", "define", "const"],
+    q: "Which is NOT a programming language?",
+    options: ["Python", "Java", "HTML", "Oracle"],
     answer: 3
-  },
-  {
-    q: "Which feature allows using properties of another class?",
-    options: ["Polymorphism", "Inheritance", "Encapsulation", "Abstraction"],
-    answer: 1
-  },
-  {
-    q: "Which symbol is used for comments in Python?",
-    options: ["//", "/* */", "#", "%%"],
-    answer: 2
-  },
-  {
-    q: "Which data structure follows LIFO?",
-    options: ["Queue", "Array", "Stack", "Linked List"],
-    answer: 2
-  },
-  {
-    q: "Which method starts execution in Java?",
-    options: ["start()", "main()", "run()", "execute()"],
-    answer: 1
   }
 ];
 
-/* ========= VARIABLES ========= */
-let index = 0;
+let current = 0;
 let score = 0;
-let selected = null;
-let time = 1200;
+let time = 120;
+let timer;
 
-/* ========= LOAD QUESTION ========= */
+function startQuiz() {
+  document.getElementById("startScreen").style.display = "none";
+  document.getElementById("quizScreen").style.display = "block";
+  loadQuestion();
+  startTimer();
+}
+
 function loadQuestion() {
-  selected = null;
-  document.getElementById("question").innerText = 
-    (index + 1) + ". " + questions[index].q;
-
-  const optBox = document.getElementById("options");
-  optBox.innerHTML = "";
-
-  questions[index].options.forEach((opt, i) => {
-    const div = document.createElement("div");
-    div.className = "option";
-    div.innerText = opt;
-    div.onclick = () => selectOption(div, i);
-    optBox.appendChild(div);
-  });
-}
-
-function selectOption(el, i) {
-  document.querySelectorAll(".option")
-    .forEach(o => o.classList.remove("selected"));
-  el.classList.add("selected");
-  selected = i;
-}
-
-/* ========= NEXT ========= */
-function nextQuestion() {
-  if (selected === questions[index].answer) {
-    score++;
-  }
-
-  index++;
-
-  if (index >= questions.length) {
+  if (current >= questions.length) {
     endQuiz();
     return;
   }
 
+  document.getElementById("question").innerText = questions[current].q;
+  const optDiv = document.getElementById("options");
+  optDiv.innerHTML = "";
+
+  questions[current].options.forEach((opt, i) => {
+    const div = document.createElement("div");
+    div.className = "option";
+    div.innerText = opt;
+    div.onclick = () => checkAnswer(i);
+    optDiv.appendChild(div);
+  });
+}
+
+function checkAnswer(i) {
+  if (i === questions[current].answer) score++;
+  current++;
   loadQuestion();
 }
 
-/* ========= END QUIZ ========= */
-function endQuiz() {
-  document.body.innerHTML = `
-    <div style="text-align:center">
-      <h1>Round 2 Completed</h1>
-      <h2>Your Score: ${score}</h2>
-      <p>Please contact the coordinator.</p>
-    </div>
-  `;
+function startTimer() {
+  timer = setInterval(() => {
+    time--;
+    document.getElementById("time").innerText = time;
+    if (time <= 0) {
+      clearInterval(timer);
+      endQuiz();
+    }
+  }, 1000);
 }
 
-/* ========= TIMER ========= */
-setInterval(() => {
-  time--;
-  document.getElementById("time").innerText = time;
-  if (time <= 0) endQuiz();
-}, 1000);
+function endQuiz() {
+  clearInterval(timer);
 
-/* ========= START ========= */
-loadQuestion();
+  const mobile = prompt("Enter your registered mobile number");
+
+  fetch("https://script.google.com/macros/s/AKfycbwdOJIW3c4G4NsE3kAZRxrAhWdlPz8We-82OHyMTzRwfXmX4NhP9kwWVGhDGNZZISY0nw/exec", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `mobile=${mobile}&score=${score}&round=2`
+  });
+
+  document.body.innerHTML = `
+    <h1>Round 2 Completed</h1>
+    <h2>Your Score: ${score}</h2>
+    <p>Thank you for participating</p>
+  `;
+}
 </script>
 
 </body>
